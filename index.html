@@ -75,12 +75,55 @@ let floatY = 0;
 const speed = 2.1; // Minimal langsamer
 
 // ANTI-CHEAT: Lösungen sind Base64 codiert (0=MA==, 1=MQ==, 2=Mg==)
-let questions = [
-    { q: "1 ist richtig", a: ["1", "2", "3"], c: "MA==" },
-    { q: "2 ist richtig", a: ["1", "2", "3"], c: "MQ==" },
-    { q: "3 ist richtig", a: ["1", "2", "3"], c: "Mg==" },
-    { q: "2 ist richtig", a: ["1", "2", "3"], c: "MQ==" }
+let questions = const quizData = [ 
+  { q: "In welchem Jahrhundert begann der grosse Wandel?", a: ["17.", "19.", "21."], c: 1, info: "Richtig! Das 19. Jahrhundert war die Hauptzeit." },
+  { q: "Wie nennt man den Übergang zur Massenproduktion?", a: ["Handarbeit", "Industrialisierung", "Digitalisierung"], c: 1, info: "Genau, die industrielle Produktion veränderte alles." },
+  { q: "Was war der wichtigste Motor dieser Zeit?", a: ["Elektromotor", "Dampfmaschine", "Solarpanel"], c: 1, info: "Die Dampfmaschine war das Herz der Industrie." },
+  { q: "Welcher Rohstoff befeuerte die Maschinen?", a: ["Holz", "Kohle", "Erdöl"], c: 1, info: "Ohne Kohle gab es keinen Dampf." },
+  { q: "Was ersetzte die neue Maschinenarbeit?", a: ["Handarbeit", "Roboter", "KI"], c: 0, info: "Früher wurde fast alles von Hand gemacht." },
+  { q: "Wo fand die neue Massenproduktion statt?", a: ["Zuhause", "Fabriken", "Büros"], c: 1, info: "Die Arbeit verlagerte sich in grosse Fabrikhallen." },
+  { q: "Wie nennt man das soziale Elend der Arbeiter?", a: ["Sozialfrage", "Luxusproblem", "Geldnot"], c: 0, info: "Die Soziale Frage war das grösste Problem der Zeit." },
+  { q: "Was wurde durch Wärme in Bewegung umgewandelt?", a: ["Licht", "Energie", "Magnetismus"], c: 1, info: "Wärme erzeugte den Druck für die Kolben." },
+  { q: "Wovon war man vor der Dampfmaschine abhängig?", a: ["Atomkraft", "Muskelkraft", "Elektrizität"], c: 1, info: "Mensch und Tier waren die Kraftquelle." },
+  { q: "Welches Metall wurde durch mehr Kohle wichtiger?", a: ["Gold", "Eisen", "Kupfer"], c: 1, info: "Eisen brauchte man für Maschinen und Schienen." },
+
+  // Themenblock 2: Kinderarbeit & Soziale Lage
+  { q: "Wie nannte man die neue Arbeiterklasse?", a: ["Adel", "Proletariat", "Bürgertum"], c: 1, info: "Das Proletariat besass nur seine Arbeitskraft." },
+  { q: "Wie viele Stunden arbeiteten Kinder oft täglich?", a: ["4", "16", "8"], c: 1, info: "Ein Arbeitstag dauerte oft von früh bis spät nachts." },
+  { q: "Warum stellten Fabriken Kinder ein?", a: ["Erfahrung", "Billig", "Kraft"], c: 1, info: "Kinder bekamen viel weniger Lohn als Erwachsene." },
+  { q: "Wo mussten Kinder in enge Stollen kriechen?", a: ["Bergbau", "Büro", "Küche"], c: 0, info: "Wegen ihrer Grösse schickte man sie unter Tage." },
+  { q: "Was hatten arbeitende Kinder keine Zeit zu besuchen?", a: ["Kino", "Schule", "Spielplatz"], c: 1, info: "Bildung blieb für Arbeiterkinder ein Traum." },
+  { q: "Wie nennt man den Kreislauf aus Not und Arbeit?", a: ["Urlaub", "Teufelskreis", "Gewinnspiel"], c: 1, info: "Wer arm war, musste arbeiten und blieb arm." },
+  { q: "Was passierte mit Kranken in der Fabrik?", a: ["Kur", "Entlassung", "Lohnerhöhung"], c: 1, info: "Es gab damals keine soziale Absicherung." },
+  { q: "Wie nannte man die extrem niedrigen Gehälter?", a: ["Bonus", "Hungerlöhne", "Taschengeld"], c: 1, info: "Man konnte davon kaum überleben." },
+  { q: "Was fehlte in den dunklen Elendsquartieren?", a: ["Fernseher", "Hygiene", "Heizung"], c: 1, info: "Fehlende Hygiene führte zu Krankheiten." },
+  { q: "Wer musste neben den Männern noch mitarbeiten?", a: ["Tiere", "Frauen", "Rentner"], c: 1, info: "Die ganze Familie musste zum Überleben beitragen." },
+
+  // Themenblock 3: Textilindustrie & Innovation
+  { q: "Welche Industrie war der Vorreiter?", a: ["Autoindustrie", "Textilindustrie", "IT-Branche"], c: 1, info: "Alles begann mit der Weberei." },
+  { q: "Wie hiess die berühmte Spinnmaschine?", a: ["Susi", "Jenny", "Marta"], c: 1, info: "Die 'Spinning Jenny' war weltberühmt." },
+  { q: "Wie viele Fäden spann die 'Jenny' gleichzeitig?", a: ["10", "100", "5"], c: 1, info: "Das war eine enorme Steigerung der Produktion." },
+  { q: "Was wurde mechanisch, um Stoffe zu weben?", a: ["Nähmaschine", "Webstuhl", "Schere"], c: 1, info: "Der mechanische Webstuhl war ein Meilenstein." },
+  { q: "Was wurde Kleidung durch die schnelle Produktion?", a: ["Einzelstück", "Massenprodukt", "Luxusgut"], c: 1, info: "Kleidung wurde für alle erschwinglich." },
+  { q: "Womit trieb man die ersten Webstühle an?", a: ["Diesel", "Wasserkraft", "Batterien"], c: 1, info: "Frühe Fabriken standen oft an Flüssen." },
+  { q: "Was entstand zwischen Spinnern und Webern?", a: ["Pause", "Wettlauf", "Freundschaft"], c: 1, info: "Beide mussten immer schneller werden." },
+  { q: "Was wurde durch die Maschinen massiv gesteigert?", a: ["Preise", "Produktion", "Urlaubstage"], c: 1, info: "Es konnte viel mehr in kürzerer Zeit hergestellt werden." },
+  { q: "Welches Material wurde hauptsächlich verarbeitet?", a: ["Seide", "Baumwolle", "Plastik"], c: 1, info: "Baumwolle wurde zum wichtigsten Rohstoff." },
+  { q: "Wo wurden die Textilmaschinen aufgestellt?", a: ["Garagen", "Fabrikhallen", "Wohnzimmer"], c: 1, info: "Die grossen Maschinen brauchten viel Platz." },
+
+  // Themenblock 4: Eisenbahn & Transport
+  { q: "Welches Fahrzeug revolutionierte den Transport?", a: ["Auto", "Eisenbahn", "Flugzeug"], c: 1, info: "Die Dampflok veränderte die Welt." },
+  { q: "Was wurde vor allem mit der Bahn transportiert?", a: ["Briefe", "Kohle", "Daten"], c: 1, info: "Schwere Güter konnten nun weit reisen." },
+  { q: "Woran mussten sich die Menschen nun orientieren?", a: ["Sonne", "Fahrplänen", "Gefühl"], c: 1, info: "Pünktlichkeit wurde plötzlich extrem wichtig." },
+  { q: "Was veränderte sich durch das höhere Tempo?", a: ["Wetter", "Zeitgefühl", "Sprache"], c: 1, info: "Entfernungen spielten kaum noch eine Rolle." },
+  { q: "Womit reiste man vor der Eisenbahn?", a: ["Fahrrad", "Postkutsche", "U-Bahn"], c: 1, info: "Kutschen waren langsam und anstrengend." },
+  { q: "Was wurde durch den billigen Transport grösser?", a: ["Wälder", "Städte", "Berge"], c: 1, info: "Die Menschen zogen massenweise in die Städte." },
+  { q: "Wie fühlte sich die Welt durch die Bahn an?", a: ["Grösser", "Kleiner", "Gleich"], c: 1, info: "Reisen ging nun viel schneller als zuvor." },
+  { q: "Wer profitierte extrem von der Eisenbahn?", a: ["Bauern", "Wirtschaft", "Künstler"], c: 1, info: "Handel und Industrie boomten." },
+  { q: "Was bauten die Menschen massenhaft für die Züge?", a: ["Strassen", "Schienen", "Flughäfen"], c: 1, info: "Ein riesiges Schienennetz entstand." },
+  { q: "Welches Wort beschreibt den Wandel im Verkehr?", a: ["Stau", "Transportrevolution", "Wanderung"], c: 1, info: "Es war ein radikaler Umbruch." }
 ];
+
 
 let currentQIndex = 0;
 let smoke = [];
