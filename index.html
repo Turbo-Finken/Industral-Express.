@@ -72,16 +72,48 @@ const speed = 2.1;
 let smokeParticles = [];
 
 const questions = [ 
-  { q: "In welchem Jahrhundert begann der grosse Wandel?", a: ["17.", "19.", "21."], c: 1 },
-  { q: "Wie nennt man den Übergang zur Massenproduktion?", a: ["Handarbeit", "Industrialisierung", "Digitalisierung"], c: 1 },
-  { q: "Was war der wichtigste Motor dieser Zeit?", a: ["Elektromotor", "Dampfmaschine", "Solarpanel"], c: 1 },
-  { q: "Welcher Rohstoff befeuerte die Maschinen?", a: ["Holz", "Kohle", "Erdöl"], c: 1 },
-  { q: "Was ersetzte die neue Maschinenarbeit?", a: ["Handarbeit", "Roboter", "KI"], c: 0 },
-  { q: "Wo fand die neue Massenproduktion statt?", a: ["Zuhause", "Fabriken", "Büros"], c: 1 },
-  { q: "Wie nennt man das soziale Elend der Arbeiter?", a: ["Sozialfrage", "Luxusproblem", "Geldnot"], c: 0 },
-  { q: "Was wurde durch Wärme in Bewegung umgewandelt?", a: ["Licht", "Energie", "Magnetismus"], c: 1 }
-  // Du kannst hier die restlichen Fragen aus deiner Liste einfügen
-];
+    { q: "Was markiert den Kern der Industriellen Revolution?", a: ["Rückkehr zum Handwerk", "Übergang zur Massenproduktion", "Abschaffung des Geldes", "Fokus auf Landwirtschaft"], c: 1, info: "Richtig! Die Fabrikproduktion ersetzte die alte Heimarbeit." },
+    { q: "Welche technische Erfindung war der Hauptmotor der Industrialisierung?", a: ["Buchdruck", "Dampfmaschine", "Computer", "Windrad"], c: 1, info: "Genau! James Watts Dampfmaschine lieferte die nötige Antriebskraft." },
+    { q: "Wie wird die „Soziale Frage“ historisch definiert?", a: ["Berufsumfrage", "Technik-Frage", "Elend der Arbeiterklasse", "Steuerstrategie"], c: 2, info: "Korrekt. Sie beschreibt die massiven sozialen Probleme jener Zeit." },
+    { q: "Wie lange arbeiteten Kinder oft unter industriellen Bedingungen?", a: ["4 Stunden", "6 Stunden", "8 Stunden", "12 bis 16 Stunden"], c: 3, info: "Leider wahr: Kinderarbeit ohne Pausen war an der Tagesordnung." },
+    { q: "Warum setzte man Kinder bevorzugt in Kohlebergwerken ein?", a: ["Wegen Gasen", "Geringe Körpergrösse für enge Stollen", "Technische Ausbildung", "Gesetzliche Pflicht"], c: 1, info: "Stimmt. Kinder kamen dort hin, wo Erwachsene zu gross waren." },
+    { q: "Welche Auswirkung hatte die Fabrikarbeit auf die Bildung der Kinder?", a: ["Lesestunden", "Keine Zeit für Schulbildung", "Mathe-Unterricht", "Nachtschulzeit"], c: 1, info: "Richtig. Die Arbeit liess keinen Raum für Lernen oder Entwicklung." },
+    { q: "Was versteht man unter dem Begriff „Proletariat“?", a: ["Fabrikbesitzer", "Klasse der lohnabhängigen Arbeiter", "Maschinenstürmer", "Beamte"], c: 1, info: "Korrekt. Proletarier besassen nichts ausser ihrer Arbeitskraft." },
+    { q: "Wie sahen die Löhne für das Proletariat meistens aus?", a: ["Sehr hoch", "Faire Gehälter", "Hungerlöhne", "Fabrikanteile"], c: 2, info: "Stimmt. Der Lohn reichte oft kaum zum Überleben der Familie." },
+    { q: "Wer erfand die „Spinning Jenny“ im Jahr 1765?", a: ["James Watt", "James Hargreaves", "Richard Guest", "Jenny"], c: 1, info: "Richtig! James Hargreaves revolutionierte damit das Spinnen." },
+    { q: "Warum nannte man die Maschine vermutlich „Spinning Jenny“?", a: ["Abkürzung", "Nach Hargreaves Tochter oder Frau", "Vom König gewählt", "Fachbegriff"], c: 1, info: "Genau, es wird vermutet, dass der Name aus seinem Umfeld kam." },
+    { q: "Wie viele Spinner ersetzte die Spinning Jenny anfangs?", a: ["Einen", "Etwa 4 bis 8", "Eine ganze Stadt", "Keinen"], c: 1, info: "Korrekt. Die Effizienz wurde schlagartig vervielfacht." },
+    { q: "Wodurch wurde die erste Version der Spinning Jenny betrieben?", a: ["Dampf", "Wasser", "Handkurbel", "Federn"], c: 2, info: "Richtig. Die erste Version erforderte noch Muskelkraft." },
+    { q: "Was ist die „Waterframe“ im Kontext der Spinnmaschinen?", a: ["Reinigungsrahmen", "Spinnmaschine durch Wasserkraft", "Dampfmaschine", "Messgerät"], c: 1, info: "Stimmt. Wasser war hier der Energielieferant." },
+    { q: "Welche Maschine kombinierte Jenny und Waterframe?", a: ["Selfaktor", "Spinning Mule", "Webstuhl", "Lokomotive"], c: 1, info: "Richtig! Die 'Mule' (Maultier) war eine Kreuzung beider." },
+    { q: "Welche Energiequelle löste die Dampfmaschine ab?", a: ["Sonne", "Wind, Wasser und Muskelkraft", "Kernkraft", "Batterien"], c: 1, info: "Genau. Fabriken wurden unabhängig von Naturkräften." },
+    { q: "Wo konnten Fabriken dank der Dampfmaschine entstehen?", a: ["Nur im Wald", "Überall, vor allem in Städten", "Nur am Meer", "Auf Bergen"], c: 1, info: "Stimmt. Standorte wurden flexibel wählbar." },
+    { q: "Welchen Kreislauf löste die Dampfmaschine aus?", a: ["Kohle -> Maschinen -> Eisen", "Arbeit -> Freizeit", "Wollverbot", "Rückzug aufs Land"], c: 0, info: "Richtig! Ein Motor, der sich selbst beschleunigte." },
+    { q: "Was war die „Spinning Jenny“ technisch gesehen genau?", a: ["Webstuhl", "Mehrspindel-Spinnmaschine", "Transportwagen", "Reiniger"], c: 1, info: "Genau. Sie konnte viele Fäden gleichzeitig spinnen." },
+    { q: "Wie beeinflusste die Eisenbahn das Zeitgefühl?", a: ["Keine Uhren mehr", "Feste Fahrpläne", "Längere Reisezeit", "Dorfzeit"], c: 1, info: "Stimmt. Pünktlichkeit wurde plötzlich essenziell." },
+    { q: "Was passierte bei Arbeitsunfähigkeit im Proletariat?", a: ["Rente", "Staatshilfe", "Entlassung und Not", "Geld von Kollegen"], c: 2, info: "Bittere Realität: Es gab keine soziale Absicherung." },
+    { q: "Warum wurde Kleidung zum Massenprodukt?", a: ["Mehr Bedarf", "Schnellere & billigere Produktion", "Geschenke", "Handarbeitsverbot"], c: 1, info: "Richtig. Die Industrie machte Stoffe erschwinglich." },
+    { q: "Welche Rolle spielte die Kohle?", a: ["Brot-Ersatz", "Brennstoff für Maschinen", "Deko", "Kleidungsstoff"], c: 1, info: "Genau. Ohne Kohle keine Dampfkraft." },
+    { q: "Wie waren die Wohnverhältnisse in Arbeiterquartieren?", a: ["Luxuriös", "Eng, überfüllt und unhygienisch", "Eigene Häuser", "Villen"], c: 1, info: "Stimmt. Ganze Familien teilten sich oft ein einziges Zimmer." },
+    { q: "Welches Land gilt als Mutterland der Industrialisierung?", a: ["Deutschland", "Frankreich", "Grossbritannien", "USA"], c: 2, info: "Richtig! In England fing alles an." },
+    { q: "Was versteht man unter Urbanisierung?", a: ["Landflucht in die Städte", "Bau von Parks", "Abriss von Fabriken", "Urlaubsreisen"], c: 0, info: "Stimmt. Millionen Menschen zogen in die Städte." },
+    { q: "Wer erfand die verbesserte Dampfmaschine?", a: ["Einstein", "James Watt", "Newton", "Tesla"], c: 1, info: "Genau, James Watt machte sie erst effizient." },
+    { q: "Was war ein Hauptproblem der frühen Fabriken?", a: ["Zu viel Urlaub", "Lärm, Hitze und Abgase", "Zu hohe Löhne", "Geringe Arbeitszeit"], c: 1, info: "Richtig. Die Bedingungen waren extrem gesundheitsschädlich." },
+    { q: "Wie nannte man die Unternehmer, die Fabriken besassen?", a: ["Proletarier", "Bourgeoisie", "Ritter", "Bauern"], c: 1, info: "Korrekt. Sie bildeten die neue reiche Oberschicht." },
+    { q: "Welches Transportmittel revolutionierte den Handel zu Land?", a: ["Pferdekutsche", "Eisenbahn", "Auto", "Flugzeug"], c: 1, info: "Richtig! Die Eisenbahn war das Symbol des Fortschritts." },
+    { q: "Was war der 'Luddismus'?", a: ["Eine neue Mode", "Zerstörung von Maschinen aus Angst", "Eine Musikrichtung", "Eine Religion"], c: 1, info: "Stimmt. Maschinenstürmer sahen in der Technik ihren Feind." },
+    { q: "Wie nannte man die Abgase über den Industriestädten?", a: ["Nebel", "Smog", "Sauerstoff", "Dunst"], c: 1, info: "Richtig. Die Luftverschmutzung war massiv." },
+    { q: "Wer schrieb das 'Kommunistische Manifest'?", a: ["James Watt", "Karl Marx & Friedrich Engels", "Napoleon", "Bismarck"], c: 1, info: "Korrekt. Es war eine Antwort auf die Not der Arbeiter." },
+    { q: "Welcher Rohstoff war für die Eisenherstellung wichtig?", a: ["Gold", "Eisenerz", "Silber", "Kupfer"], c: 1, info: "Stimmt. Eisen war das Skelett der Maschinen." },
+    { q: "Was ersetzte die Dampfmaschine später als Energiequelle?", a: ["Elektrizität", "Holz", "Pferde", "Wale"], c: 0, info: "Richtig. Strom wurde die Energie der zweiten Revolution." },
+    { q: "Was war die Folge von zu viel Produktion?", a: ["Mehr Hunger", "Überproduktion und Wirtschaftskrisen", "Weniger Handel", "Weltfrieden"], c: 1, info: "Korrekt. Der Markt war manchmal gesättigt." },
+    { q: "Wie nannte man die grossen Zusammenschlüsse von Arbeitern?", a: ["Armeen", "Gewerkschaften", "Sportvereine", "Kirchen"], c: 1, info: "Richtig! Sie kämpften für bessere Rechte." },
+    { q: "Was wurde durch die Industrialisierung eingeführt?", a: ["Schichtarbeit", "Jederzeit frei", "Nur Sonntagsarbeit", "Heimarbeit-Pflicht"], c: 0, info: "Stimmt. Die Maschinen durften nie stillstehen." },
+    { q: "Was war die erste grosse Industriebranche?", a: ["Autoindustrie", "Textilindustrie", "Computertechnik", "Raumfahrt"], c: 1, info: "Genau. Alles begann mit Baumwolle und Webstühlen." },
+    { q: "Wie nennt man den Wandel der Gesellschaft heute?", a: ["Industrie 4.0", "Steinzeit", "Mittelalter", "Handwerksära"], c: 0, info: "Richtig! Wir befinden uns in der digitalen Vernetzung." },
+    { q: "Was war ein Ziel der ersten Arbeitergesetze?", a: ["Mehr Steuern", "Verbot von Kinderarbeit", "Längere Arbeitszeit", "Höhere Preise"], c: 1, info: "Genau. Erste Gesetze sollten die Kleinsten schützen." }
+]
+
 
 function updateHearts() {
     const container = document.getElementById("heart-container");
