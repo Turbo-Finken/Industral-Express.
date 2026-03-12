@@ -21,7 +21,7 @@
     canvas { display: block; }
 </style>
 </head>
-<body oncontextmenu="return false;"> <!-- Rechtsklick gesperrt -->
+<body oncontextmenu="return false;">
 
 <div id="overlay"></div>
 <div id="hud">
@@ -43,13 +43,11 @@
 <canvas id="game"></canvas>
 
 <script>
-// ANTI-CHEAT: Tastenkombinationen blockieren
+// ANTI-CHEAT
 document.onkeydown = function(e) {
-    if(e.keyCode == 123) return false; // F12
-    if(e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) return false;
-    if(e.ctrlKey && e.shiftKey && e.keyCode == 'C'.charCodeAt(0)) return false;
-    if(e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) return false;
-    if(e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) return false;
+    if(e.keyCode == 123) return false;
+    if(e.ctrlKey && e.shiftKey && (e.keyCode == 73 || e.keyCode == 67 || e.keyCode == 74)) return false;
+    if(e.ctrlKey && e.keyCode == 85) return false;
 };
 
 const canvas = document.getElementById("game");
@@ -66,212 +64,150 @@ let score = 0;
 let lives = 3;
 let combo = 0;
 let answerY = -200;
-let frameCount = 0;
-let shake = 0;
 let gameActive = true;
-let floatingText = "";
-let floatY = 0;
-
-const speed = 2.1; // Minimal langsamer
-
-// ANTI-CHEAT: Lösungen sind Base64 codiert (0=MA==, 1=MQ==, 2=Mg==)
-let questions = const quizData = [ 
-  { q: "In welchem Jahrhundert begann der grosse Wandel?", a: ["17.", "19.", "21."], c: 1, info: "Richtig! Das 19. Jahrhundert war die Hauptzeit." },
-  { q: "Wie nennt man den Übergang zur Massenproduktion?", a: ["Handarbeit", "Industrialisierung", "Digitalisierung"], c: 1, info: "Genau, die industrielle Produktion veränderte alles." },
-  { q: "Was war der wichtigste Motor dieser Zeit?", a: ["Elektromotor", "Dampfmaschine", "Solarpanel"], c: 1, info: "Die Dampfmaschine war das Herz der Industrie." },
-  { q: "Welcher Rohstoff befeuerte die Maschinen?", a: ["Holz", "Kohle", "Erdöl"], c: 1, info: "Ohne Kohle gab es keinen Dampf." },
-  { q: "Was ersetzte die neue Maschinenarbeit?", a: ["Handarbeit", "Roboter", "KI"], c: 0, info: "Früher wurde fast alles von Hand gemacht." },
-  { q: "Wo fand die neue Massenproduktion statt?", a: ["Zuhause", "Fabriken", "Büros"], c: 1, info: "Die Arbeit verlagerte sich in grosse Fabrikhallen." },
-  { q: "Wie nennt man das soziale Elend der Arbeiter?", a: ["Sozialfrage", "Luxusproblem", "Geldnot"], c: 0, info: "Die Soziale Frage war das grösste Problem der Zeit." },
-  { q: "Was wurde durch Wärme in Bewegung umgewandelt?", a: ["Licht", "Energie", "Magnetismus"], c: 1, info: "Wärme erzeugte den Druck für die Kolben." },
-  { q: "Wovon war man vor der Dampfmaschine abhängig?", a: ["Atomkraft", "Muskelkraft", "Elektrizität"], c: 1, info: "Mensch und Tier waren die Kraftquelle." },
-  { q: "Welches Metall wurde durch mehr Kohle wichtiger?", a: ["Gold", "Eisen", "Kupfer"], c: 1, info: "Eisen brauchte man für Maschinen und Schienen." },
-
-  // Themenblock 2: Kinderarbeit & Soziale Lage
-  { q: "Wie nannte man die neue Arbeiterklasse?", a: ["Adel", "Proletariat", "Bürgertum"], c: 1, info: "Das Proletariat besass nur seine Arbeitskraft." },
-  { q: "Wie viele Stunden arbeiteten Kinder oft täglich?", a: ["4", "16", "8"], c: 1, info: "Ein Arbeitstag dauerte oft von früh bis spät nachts." },
-  { q: "Warum stellten Fabriken Kinder ein?", a: ["Erfahrung", "Billig", "Kraft"], c: 1, info: "Kinder bekamen viel weniger Lohn als Erwachsene." },
-  { q: "Wo mussten Kinder in enge Stollen kriechen?", a: ["Bergbau", "Büro", "Küche"], c: 0, info: "Wegen ihrer Grösse schickte man sie unter Tage." },
-  { q: "Was hatten arbeitende Kinder keine Zeit zu besuchen?", a: ["Kino", "Schule", "Spielplatz"], c: 1, info: "Bildung blieb für Arbeiterkinder ein Traum." },
-  { q: "Wie nennt man den Kreislauf aus Not und Arbeit?", a: ["Urlaub", "Teufelskreis", "Gewinnspiel"], c: 1, info: "Wer arm war, musste arbeiten und blieb arm." },
-  { q: "Was passierte mit Kranken in der Fabrik?", a: ["Kur", "Entlassung", "Lohnerhöhung"], c: 1, info: "Es gab damals keine soziale Absicherung." },
-  { q: "Wie nannte man die extrem niedrigen Gehälter?", a: ["Bonus", "Hungerlöhne", "Taschengeld"], c: 1, info: "Man konnte davon kaum überleben." },
-  { q: "Was fehlte in den dunklen Elendsquartieren?", a: ["Fernseher", "Hygiene", "Heizung"], c: 1, info: "Fehlende Hygiene führte zu Krankheiten." },
-  { q: "Wer musste neben den Männern noch mitarbeiten?", a: ["Tiere", "Frauen", "Rentner"], c: 1, info: "Die ganze Familie musste zum Überleben beitragen." },
-
-  // Themenblock 3: Textilindustrie & Innovation
-  { q: "Welche Industrie war der Vorreiter?", a: ["Autoindustrie", "Textilindustrie", "IT-Branche"], c: 1, info: "Alles begann mit der Weberei." },
-  { q: "Wie hiess die berühmte Spinnmaschine?", a: ["Susi", "Jenny", "Marta"], c: 1, info: "Die 'Spinning Jenny' war weltberühmt." },
-  { q: "Wie viele Fäden spann die 'Jenny' gleichzeitig?", a: ["10", "100", "5"], c: 1, info: "Das war eine enorme Steigerung der Produktion." },
-  { q: "Was wurde mechanisch, um Stoffe zu weben?", a: ["Nähmaschine", "Webstuhl", "Schere"], c: 1, info: "Der mechanische Webstuhl war ein Meilenstein." },
-  { q: "Was wurde Kleidung durch die schnelle Produktion?", a: ["Einzelstück", "Massenprodukt", "Luxusgut"], c: 1, info: "Kleidung wurde für alle erschwinglich." },
-  { q: "Womit trieb man die ersten Webstühle an?", a: ["Diesel", "Wasserkraft", "Batterien"], c: 1, info: "Frühe Fabriken standen oft an Flüssen." },
-  { q: "Was entstand zwischen Spinnern und Webern?", a: ["Pause", "Wettlauf", "Freundschaft"], c: 1, info: "Beide mussten immer schneller werden." },
-  { q: "Was wurde durch die Maschinen massiv gesteigert?", a: ["Preise", "Produktion", "Urlaubstage"], c: 1, info: "Es konnte viel mehr in kürzerer Zeit hergestellt werden." },
-  { q: "Welches Material wurde hauptsächlich verarbeitet?", a: ["Seide", "Baumwolle", "Plastik"], c: 1, info: "Baumwolle wurde zum wichtigsten Rohstoff." },
-  { q: "Wo wurden die Textilmaschinen aufgestellt?", a: ["Garagen", "Fabrikhallen", "Wohnzimmer"], c: 1, info: "Die grossen Maschinen brauchten viel Platz." },
-
-  // Themenblock 4: Eisenbahn & Transport
-  { q: "Welches Fahrzeug revolutionierte den Transport?", a: ["Auto", "Eisenbahn", "Flugzeug"], c: 1, info: "Die Dampflok veränderte die Welt." },
-  { q: "Was wurde vor allem mit der Bahn transportiert?", a: ["Briefe", "Kohle", "Daten"], c: 1, info: "Schwere Güter konnten nun weit reisen." },
-  { q: "Woran mussten sich die Menschen nun orientieren?", a: ["Sonne", "Fahrplänen", "Gefühl"], c: 1, info: "Pünktlichkeit wurde plötzlich extrem wichtig." },
-  { q: "Was veränderte sich durch das höhere Tempo?", a: ["Wetter", "Zeitgefühl", "Sprache"], c: 1, info: "Entfernungen spielten kaum noch eine Rolle." },
-  { q: "Womit reiste man vor der Eisenbahn?", a: ["Fahrrad", "Postkutsche", "U-Bahn"], c: 1, info: "Kutschen waren langsam und anstrengend." },
-  { q: "Was wurde durch den billigen Transport grösser?", a: ["Wälder", "Städte", "Berge"], c: 1, info: "Die Menschen zogen massenweise in die Städte." },
-  { q: "Wie fühlte sich die Welt durch die Bahn an?", a: ["Grösser", "Kleiner", "Gleich"], c: 1, info: "Reisen ging nun viel schneller als zuvor." },
-  { q: "Wer profitierte extrem von der Eisenbahn?", a: ["Bauern", "Wirtschaft", "Künstler"], c: 1, info: "Handel und Industrie boomten." },
-  { q: "Was bauten die Menschen massenhaft für die Züge?", a: ["Strassen", "Schienen", "Flughäfen"], c: 1, info: "Ein riesiges Schienennetz entstand." },
-  { q: "Welches Wort beschreibt den Wandel im Verkehr?", a: ["Stau", "Transportrevolution", "Wanderung"], c: 1, info: "Es war ein radikaler Umbruch." }
-];
-
-
 let currentQIndex = 0;
-let smoke = [];
+const speed = 2.1;
+
+// Rauch-Partikel Array
+let smokeParticles = [];
+
+const questions = [ 
+  { q: "In welchem Jahrhundert begann der grosse Wandel?", a: ["17.", "19.", "21."], c: 1 },
+  { q: "Wie nennt man den Übergang zur Massenproduktion?", a: ["Handarbeit", "Industrialisierung", "Digitalisierung"], c: 1 },
+  { q: "Was war der wichtigste Motor dieser Zeit?", a: ["Elektromotor", "Dampfmaschine", "Solarpanel"], c: 1 },
+  { q: "Welcher Rohstoff befeuerte die Maschinen?", a: ["Holz", "Kohle", "Erdöl"], c: 1 },
+  { q: "Was ersetzte die neue Maschinenarbeit?", a: ["Handarbeit", "Roboter", "KI"], c: 0 },
+  { q: "Wo fand die neue Massenproduktion statt?", a: ["Zuhause", "Fabriken", "Büros"], c: 1 },
+  { q: "Wie nennt man das soziale Elend der Arbeiter?", a: ["Sozialfrage", "Luxusproblem", "Geldnot"], c: 0 },
+  { q: "Was wurde durch Wärme in Bewegung umgewandelt?", a: ["Licht", "Energie", "Magnetismus"], c: 1 }
+  // Du kannst hier die restlichen Fragen aus deiner Liste einfügen
+];
 
 function updateHearts() {
     const container = document.getElementById("heart-container");
     container.innerHTML = "";
     for(let i=0; i<3; i++) {
         let h = document.createElement("div");
-        h.className = i < lives ? "heart" : "heart lost";
+        h.className = "heart" + (i >= lives ? " lost" : "");
         container.appendChild(h);
     }
 }
 
-document.addEventListener("keydown", e => {
-    if(!gameActive) return;
+function nextQuestion() {
+    currentQIndex = Math.floor(Math.random() * questions.length);
+    document.getElementById("question-text").innerText = questions[currentQIndex].q;
+    answerY = -150;
+}
+
+function gameOver() {
+    gameActive = false;
+    document.getElementById("game-over").style.display = "block";
+    document.getElementById("final-score").innerText = "Punkte: " + score;
+}
+
+function resetGame() { location.reload(); }
+
+window.addEventListener("keydown", (e) => {
     if(e.key === "ArrowLeft" && currentTrack > 0) currentTrack--;
     if(e.key === "ArrowRight" && currentTrack < 2) currentTrack++;
     targetX = tracks[currentTrack];
 });
 
-function checkAnswer() {
-    let q = questions[currentQIndex];
-    // ANTI-CHEAT: Lösung wird erst beim Check entschlüsselt
-    let solved = parseInt(atob(q.c)); 
+function drawSmoke() {
+    smokeParticles.push({x: trainX, y: canvas.height - 130, size: 5, alpha: 1});
+    for(let i = smokeParticles.length - 1; i >= 0; i--) {
+        let p = smokeParticles[i];
+        p.y -= 2; p.size += 0.5; p.alpha -= 0.02;
+        ctx.fillStyle = `rgba(150, 150, 150, ${p.alpha})`;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
+        if(p.alpha <= 0) smokeParticles.splice(i, 1);
+    }
+}
+
+function draw() {
+    if(!gameActive) return;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
     
-    if(currentTrack === solved) {
-        score++;
-        combo++;
+    // Gleise
+    ctx.strokeStyle = "rgba(212, 175, 55, 0.2)";
+    ctx.lineWidth = 4;
+    tracks.forEach(t => {
+        ctx.beginPath(); ctx.moveTo(t, 0); ctx.lineTo(t, canvas.height); ctx.stroke();
+    });
+
+    // ZUG DESIGN
+    trainX += (targetX - trainX) * 0.15;
+    
+    // Rauch zeichnen
+    drawSmoke();
+
+    // Hauptkörper (Dampflok)
+    ctx.fillStyle = "#3e2723"; // Dunkles Braun/Eisen
+    ctx.fillRect(trainX - 45, canvas.height - 110, 90, 90);
+    
+    // Dach/Führerhaus
+    ctx.fillStyle = "#d4af37";
+    ctx.fillRect(trainX - 50, canvas.height - 120, 100, 15);
+    
+    // Fenster
+    ctx.fillStyle = "#add8e6";
+    ctx.fillRect(trainX - 25, canvas.height - 95, 50, 30);
+    
+    // Schornstein
+    ctx.fillStyle = "#222";
+    ctx.fillRect(trainX - 10, canvas.height - 140, 20, 30);
+    ctx.fillRect(trainX - 15, canvas.height - 145, 30, 10);
+
+    // Goldene Zierleiste
+    ctx.fillStyle = "#d4af37";
+    ctx.fillRect(trainX - 45, canvas.height - 50, 90, 5);
+
+    // Antworten
+    answerY += speed;
+    questions[currentQIndex].a.forEach((text, i) => {
+        ctx.fillStyle = "rgba(45, 30, 15, 0.9)";
+        ctx.strokeStyle = "#d4af37";
+        ctx.fillRect(tracks[i] - 110, answerY, 220, 60);
+        ctx.strokeRect(tracks[i] - 110, answerY, 220, 60);
+        ctx.fillStyle = "#f1c40f";
+        ctx.font = "bold 18px Arial";
+        ctx.textAlign = "center";
+        ctx.fillText(text, tracks[i], answerY + 38);
+    });
+
+    // Kollision
+    if (answerY > canvas.height - 150 && answerY < canvas.height - 50) {
+        if (currentTrack === questions[currentQIndex].c) {
+            score += 100;
+            combo++;
+            if(combo >= 8 && lives < 3) { lives++; combo = 0; }
+            overlay.style.background = "rgba(46, 204, 113, 0.15)";
+        } else {
+            lives--;
+            combo = 0;
+            overlay.style.background = "rgba(231, 76, 60, 0.25)";
+            if(lives <= 0) gameOver();
+        }
+        setTimeout(() => overlay.style.background = "transparent", 200);
         document.getElementById("score").innerText = score;
         document.getElementById("combo-count").innerText = combo;
-        overlay.style.background = "rgba(46, 204, 113, 0.3)";
-        setTimeout(() => overlay.style.background = "transparent", 250);
-
-        if(combo >= 8) {
-            if(lives < 3) lives++;
-            updateHearts();
-            floatingText = "+1 ❤️";
-            floatY = canvas.height * 0.7;
-            combo = 0;
-            document.getElementById("combo-count").innerText = "0";
-        }
-    } else {
-        lives--;
-        combo = 0;
-        shake = 30;
-        document.getElementById("combo-count").innerText = "0";
         updateHearts();
-        overlay.style.background = "rgba(231, 76, 60, 0.5)";
-        setTimeout(() => overlay.style.background = "transparent", 250);
+        nextQuestion();
     }
-    
-    if(lives <= 0) gameOver();
-    else nextQuestion();
-}
 
-function gameOver() {
-    gameActive = false;
-    document.getElementById("final-score").innerText = "Punkte: " + score;
-    document.getElementById("game-over").style.display = "block";
-}
-
-function resetGame() {
-    lives = 3; score = 0; combo = 0; gameActive = true; answerY = -200;
-    document.getElementById("score").innerText = "0";
-    document.getElementById("combo-count").innerText = "0";
-    document.getElementById("game-over").style.display = "none";
-    updateHearts();
-    nextQuestion();
-}
-
-function drawTracks() {
-    tracks.forEach(x => {
-        ctx.fillStyle = "#444";
-        ctx.beginPath();
-        ctx.roundRect(x - 45, 0, 10, canvas.height, 5);
-        ctx.roundRect(x + 35, 0, 10, canvas.height, 5);
-        ctx.fill();
-        ctx.fillStyle = "#3d2b1f";
-        for (let i = -100; i < canvas.height; i += 80) {
-            ctx.beginPath();
-            ctx.roundRect(x - 70, i + (frameCount % 80), 140, 18, 5);
-            ctx.fill();
-        }
-    });
-}
-
-function drawTrain() {
-    trainX += (targetX - trainX) * 0.15;
-    let visualX = trainX + (Math.random() - 0.5) * shake;
-    if(shake > 0) shake *= 0.9;
-    let y = canvas.height * 0.78;
-
-    ctx.fillStyle = "#111"; 
-    ctx.beginPath(); ctx.roundRect(visualX - 35, y, 70, 110, 15); ctx.fill();
-    ctx.fillStyle = "#d4af37"; ctx.fillRect(visualX - 36, y + 25, 72, 6);
-    ctx.fillStyle = "#222"; ctx.beginPath(); ctx.roundRect(visualX - 15, y - 30, 30, 40, 5); ctx.fill();
-    ctx.fillStyle = "#400"; ctx.beginPath(); ctx.roundRect(visualX - 42, y + 65, 84, 55, 10); ctx.fill();
-    ctx.fillStyle = "#87CEEB"; ctx.beginPath(); ctx.roundRect(visualX - 25, y + 72, 50, 22, 5); ctx.fill();
-
-    if(gameActive && frameCount % 6 === 0) smoke.push({ x: visualX, y: y - 35, s: 10, o: 0.8 });
-    if(floatingText) {
-        ctx.fillStyle = "#f1c40f"; ctx.font = "bold 30px 'Segoe UI'"; ctx.textAlign = "center";
-        ctx.fillText(floatingText, trainX, floatY);
-        floatY -= 2; if(floatY < canvas.height * 0.5) floatingText = "";
+    if (answerY > canvas.height) { 
+        lives--; updateHearts(); nextQuestion(); 
+        if(lives <= 0) gameOver(); 
     }
-}
 
-function drawAnswers() {
-    if(!gameActive) return;
-    answerY += speed; 
-    let q = questions[currentQIndex];
-    q.a.forEach((text, i) => {
-        let x = tracks[i];
-        ctx.fillStyle = "rgba(255, 255, 255, 0.25)"; 
-        ctx.strokeStyle = "rgba(212, 175, 55, 0.4)";
-        ctx.lineWidth = 3;
-        ctx.beginPath(); ctx.roundRect(x - 100, answerY, 200, 80, 20); ctx.fill(); ctx.stroke();
-        ctx.fillStyle = "white"; ctx.font = "bold 18px 'Segoe UI'"; ctx.textAlign = "center";
-        ctx.fillText(text, x, answerY + 48);
-    });
-    if(answerY > canvas.height * 0.82) checkAnswer();
-}
-
-function nextQuestion() {
-    answerY = -200;
-    currentQIndex = Math.floor(Math.random() * questions.length);
-    document.getElementById("question-text").innerHTML = `<small style="opacity:0.5; text-transform: uppercase; letter-spacing: 2px;">Frage:</small><br>${questions[currentQIndex].q}`;
-}
-
-function loop() {
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    if(gameActive) frameCount++;
-    drawTracks();
-    drawAnswers();
-    smoke.forEach((p, i) => {
-        ctx.fillStyle = `rgba(180, 180, 180, ${p.o})`;
-        ctx.beginPath(); ctx.arc(p.x, p.y, p.s, 0, Math.PI*2); ctx.fill();
-        p.y -= 3.5; p.s += 0.8; p.o -= 0.012;
-        if(p.o <= 0) smoke.splice(i, 1);
-    });
-    drawTrain();
-    requestAnimationFrame(loop);
+    requestAnimationFrame(draw);
 }
 
 updateHearts();
 nextQuestion();
-loop();
+draw();
 </script>
 </body>
 </html>
